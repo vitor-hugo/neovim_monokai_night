@@ -65,6 +65,7 @@ For LazyVim, override its existing Lualine configuration instead:
 - Pink keywords, green functions, yellow strings, cyan types, and purple numbers.
 - Treesitter and LSP semantic highlighting, including Dart/Flutter refinements.
 - Diagnostics, diffs, GitSigns, and all sixteen terminal ANSI colors.
+- `#1A1A1A` backgrounds for terminals and non-floating output buffers, including FlutterLog and quickfix.
 - Snacks picker, dashboard and indentation, Blink completion, Bufferline, WhichKey, Noice, Trouble, Lazy, and Mason highlights.
 - Optional Lualine theme.
 

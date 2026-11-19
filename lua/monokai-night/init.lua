@@ -1,5 +1,6 @@
 -- Palette and token styles from vscode-monokai-night/themes/default.json.
 local M = {}
+local output_windows = {}
 
 M.palette = {
   bg = "#1f1f1f",
@@ -7,6 +8,7 @@ M.palette = {
   text = "#f8f8f2",
   sidebar = "#161616",
   panel = "#262626",
+  output = "#1A1A1A",
   popup = "#363636",
   selection = "#464646",
   line = "#292929",
@@ -39,6 +41,9 @@ function M.setup()
     Normal = { fg = c.fg, bg = c.bg },
     NormalNC = { fg = c.fg, bg = c.bg },
     NormalFloat = { fg = c.fg, bg = c.panel },
+    OutputNormal = { fg = c.fg, bg = c.output },
+    OutputEndOfBuffer = { fg = c.output, bg = c.output },
+    OutputSignColumn = { bg = c.output },
     FloatBorder = { fg = c.muted, bg = c.panel },
     FloatTitle = { fg = c.fg, bg = c.panel, bold = true },
     FloatFooter = { fg = c.muted, bg = c.panel },
@@ -319,6 +324,60 @@ function M.setup()
   for i, color in ipairs(terminal) do
     vim.g["terminal_color_" .. (i - 1)] = color
   end
+
+  local function update_output_windows()
+    for _, win in ipairs(vim.api.nvim_list_wins()) do
+      local buf = vim.api.nvim_win_get_buf(win)
+      local kind = vim.bo[buf].buftype
+      local output = kind == "terminal"
+        or ((kind == "nofile" or kind == "quickfix" or kind == "prompt")
+          and vim.api.nvim_win_get_config(win).relative == "")
+      local previous = output_windows[win]
+      if previous and (not output or vim.g.colors_name ~= "monokai-night") then
+        if vim.wo[win].winhighlight == previous.applied then
+          vim.wo[win].winhighlight = previous.original
+        end
+        output_windows[win] = nil
+      elseif output and vim.g.colors_name == "monokai-night" then
+        local current = vim.wo[win].winhighlight
+        if not previous or current ~= previous.applied then
+          local mappings = {}
+          for mapping in current:gmatch("[^,]+") do
+            local source = mapping:match("^([^:]+):")
+            if source ~= "Normal" and source ~= "NormalNC" and source ~= "EndOfBuffer" and source ~= "SignColumn" then
+              mappings[#mappings + 1] = mapping
+            end
+          end
+          vim.list_extend(mappings, {
+            "Normal:OutputNormal",
+            "NormalNC:OutputNormal",
+            "EndOfBuffer:OutputEndOfBuffer",
+            "SignColumn:OutputSignColumn",
+          })
+          local applied = table.concat(mappings, ",")
+          output_windows[win] = { original = current, applied = applied }
+          vim.wo[win].winhighlight = applied
+        end
+      end
+    end
+    for win in pairs(output_windows) do
+      if not vim.api.nvim_win_is_valid(win) then
+        output_windows[win] = nil
+      end
+    end
+  end
+
+  local group = vim.api.nvim_create_augroup("MonokaiNightOutput", { clear = true })
+  vim.api.nvim_create_autocmd({ "BufWinEnter", "WinEnter", "TermOpen", "FileType", "ColorScheme" }, {
+    group = group,
+    callback = update_output_windows,
+  })
+  vim.api.nvim_create_autocmd("OptionSet", {
+    group = group,
+    pattern = "buftype",
+    callback = update_output_windows,
+  })
+  update_output_windows()
 end
 
 return M
