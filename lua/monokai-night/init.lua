@@ -168,6 +168,8 @@ function M.setup()
     SnacksPickerTitle = { fg = c.fg, bg = c.panel, bold = true },
     SnacksPickerMatch = { fg = c.cyan, bold = true },
     SnacksPickerDir = { fg = c.muted },
+    SnacksPickerPathHidden = { fg = c.comment },
+    SnacksPickerPathIgnored = { fg = c.comment },
     SnacksPickerDirectory = { fg = c.cyan },
     SnacksPickerPrompt = { fg = c.blue },
     SnacksPickerListCursorLine = { fg = c.text, bg = c.popup },
