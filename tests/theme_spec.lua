@@ -39,6 +39,10 @@ local ok, err = pcall(function()
   check("@lsp.type.enumMember.dart", "fg", "#dddddd")
   check("DiagnosticError", "fg", "#fe413f")
   check("SnacksPickerMatch", "fg", "#66d9ef")
+  check("SnacksPickerPathHidden", "fg", "#999999")
+  check("SnacksPickerPathIgnored", "fg", "#999999")
+  check("SnacksPickerGitStatusIgnored", "fg", "#999999")
+  check("SnacksPickerGitStatusUntracked", "fg", "#a6e22e")
   assert(not vim.api.nvim_get_hl(0, { name = "@type", link = false }).underline)
 
   for i = 0, 15 do
